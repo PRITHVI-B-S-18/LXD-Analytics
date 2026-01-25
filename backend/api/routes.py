@@ -29,7 +29,10 @@ class SharePointConfigRequest(BaseModel):
 
 
 def df_to_dict_list(df: pd.DataFrame) -> List[dict]:
-    """Convert DataFrame to list of dicts, handling NaN and datetime."""
+    """Convert DataFrame to list of dicts, handling NaN, Inf and datetime."""
+    import numpy as np
+    import math
+    
     if df is None or df.empty:
         return []
     
@@ -39,10 +42,26 @@ def df_to_dict_list(df: pd.DataFrame) -> List[dict]:
         if pd.api.types.is_datetime64_any_dtype(df[col]):
             df[col] = df[col].dt.strftime('%Y-%m-%d').fillna('')
     
-    # Replace NaN with None
+    # Replace NaN and Inf with None for JSON compliance
+    df = df.replace([np.inf, -np.inf], None)
     df = df.where(pd.notnull(df), None)
     
-    return df.to_dict(orient='records')
+    # Convert to records and clean any remaining non-JSON values
+    records = df.to_dict(orient='records')
+    
+    # Final cleanup for any edge cases
+    def clean_value(v):
+        if v is None:
+            return None
+        if isinstance(v, float):
+            if math.isnan(v) or math.isinf(v):
+                return None
+        return v
+    
+    return [
+        {k: clean_value(v) for k, v in record.items()}
+        for record in records
+    ]
 
 
 @router.post("/upload", response_model=UploadResponse)
