@@ -6,4 +6,5 @@ export { default as ServerDataTable } from './ServerDataTable';
 export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as EmptyState } from './EmptyState';
 export { default as PageHeader } from './PageHeader';
+export { default as SyncStatus } from './SyncStatus';
 export { default as FilterPanel, MultiSelectFilter, DateFilter } from './FilterPanel';

@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   AlertTriangle,
@@ -9,14 +9,17 @@ import {
   MapPin,
   Database,
   Upload,
-  Link,
   ChevronDown,
   Menu,
   X,
   Home,
   GraduationCap,
+  Cloud,
+  CloudOff,
+  RefreshCw,
 } from 'lucide-react';
 import clsx from 'clsx';
+import { getStatus, refreshSharePointData } from '../../services/api';
 
 interface NavItem {
   name: string;
@@ -47,10 +50,111 @@ const navigation: NavItem[] = [
 
 interface SidebarProps {
   onUploadClick: () => void;
-  onConnectClick?: () => void;
 }
 
-export default function Sidebar({ onUploadClick, onConnectClick }: SidebarProps) {
+// Compact Sync Status for Sidebar
+function SidebarSyncStatus() {
+  const [status, setStatus] = useState<{
+    is_connected: boolean;
+    auto_refresh_enabled: boolean;
+    last_sync: string | null;
+  } | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchStatus = async () => {
+    try {
+      const response = await getStatus();
+      if (response.sharepoint) {
+        setStatus({
+          is_connected: response.sharepoint.is_connected,
+          auto_refresh_enabled: response.sharepoint.auto_refresh_enabled,
+          last_sync: response.sharepoint.last_sync,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch status:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatLastSync = (dateStr: string | null) => {
+    if (!dateStr) return 'Never';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return 'Over a day ago';
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const result = await refreshSharePointData();
+      if (result.success) {
+        fetchStatus();
+        setTimeout(() => window.location.reload(), 500);
+      }
+    } catch (error) {
+      console.error('Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  if (!status) return null;
+
+  return (
+    <div className="px-3 py-3 border-t border-gray-100">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+        <div className="flex items-center gap-2 min-w-0">
+          {status.is_connected ? (
+            <div className="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Cloud size={14} className="text-green-600" />
+            </div>
+          ) : (
+            <div className="w-7 h-7 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+              <CloudOff size={14} className="text-gray-400" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-gray-700 truncate">
+              {status.is_connected ? 'Connected' : 'Offline'}
+            </p>
+            <div className="flex items-center gap-1">
+              {status.auto_refresh_enabled && (
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+              )}
+              <p className="text-[10px] text-gray-500 truncate">
+                {status.is_connected ? formatLastSync(status.last_sync) : 'No data'}
+              </p>
+            </div>
+          </div>
+        </div>
+        {status.is_connected && (
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50 flex-shrink-0"
+            title="Sync now"
+          >
+            <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function Sidebar({ onUploadClick }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [expandedItems, setExpandedItems] = useState<string[]>(['Utilization']);
@@ -179,29 +283,22 @@ export default function Sidebar({ onUploadClick, onConnectClick }: SidebarProps)
         ))}
       </nav>
 
-      {/* Data Source */}
-      <div className="px-3 py-4 border-t border-gray-100 space-y-2">
+      {/* Data Source - Upload only (SharePoint auto-connects via env vars) */}
+      {/* <div className="px-3 py-3 border-t border-gray-100">
         <button
           onClick={() => {
             onUploadClick();
             setIsMobileOpen(false);
           }}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 transition-all shadow-sm shadow-primary-500/25"
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 transition-all shadow-sm shadow-primary-500/25"
         >
           <Upload size={18} />
           <span>Upload Data</span>
         </button>
-        <button
-          onClick={() => {
-            onConnectClick?.();
-            setIsMobileOpen(false);
-          }}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
-        >
-          <Link size={18} />
-          <span>Connect Sheet</span>
-        </button>
-      </div>
+      </div> */}
+
+      {/* Sync Status */}
+      <SidebarSyncStatus />
     </>
   );
 
