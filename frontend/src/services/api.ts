@@ -23,7 +23,10 @@ import type {
   SharePointRefreshResponse,
 } from '../types';
 
-const API_BASE = '/api';
+// Use environment variable for API URL, fallback to /api for development proxy
+const API_BASE = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
 
 const api = axios.create({
   baseURL: API_BASE,
