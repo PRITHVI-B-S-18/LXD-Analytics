@@ -84,10 +84,18 @@ function SidebarSyncStatus() {
 
   const formatLastSync = (dateStr: string | null) => {
     if (!dateStr) return 'Never';
-    const date = new Date(dateStr);
+    // Ensure the date is treated as UTC if no timezone specified
+    let date: Date;
+    if (dateStr.endsWith('Z') || dateStr.includes('+') || dateStr.includes('-', 10)) {
+      date = new Date(dateStr);
+    } else {
+      // Append 'Z' to treat as UTC
+      date = new Date(dateStr + 'Z');
+    }
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 0) return 'Just now'; // Handle slight clock differences
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     const diffHours = Math.floor(diffMins / 60);

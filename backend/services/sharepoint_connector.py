@@ -4,7 +4,7 @@ import os
 import io
 import time
 import threading
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any, Callable
 import httpx
 import msal
@@ -288,7 +288,7 @@ class SharePointConnector:
             if response.status_code != 200:
                 raise Exception(f"Failed to download file: {response.status_code}")
             
-            self._last_sync = datetime.now()
+            self._last_sync = datetime.now(timezone.utc)
             self._last_error = None
             
             print(f"[SharePoint] File downloaded successfully ({len(response.content)} bytes)")
