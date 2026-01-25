@@ -8,7 +8,7 @@ import {
   Users,
   MapPin,
   Database,
-  Upload,
+  // Upload, // Commented for production - uncomment for local dev
   ChevronDown,
   Menu,
   X,
@@ -49,7 +49,7 @@ const navigation: NavItem[] = [
 ];
 
 interface SidebarProps {
-  onUploadClick: () => void;
+  // onUploadClick: () => void; // Commented for production - uncomment for local dev
 }
 
 // Compact Sync Status for Sidebar
@@ -154,7 +154,8 @@ function SidebarSyncStatus() {
   );
 }
 
-export default function Sidebar({ onUploadClick }: SidebarProps) {
+// For local dev with upload: function Sidebar({ onUploadClick }: SidebarProps)
+export default function Sidebar(_props: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [expandedItems, setExpandedItems] = useState<string[]>(['Utilization']);

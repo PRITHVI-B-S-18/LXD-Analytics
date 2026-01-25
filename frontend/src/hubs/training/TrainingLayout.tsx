@@ -1,17 +1,19 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
+// import { useState } from 'react'; // Uncomment for local dev with upload
 import Sidebar from './Sidebar';
-import UploadModal from '../../components/modals/UploadModal';
+// import UploadModal from '../../components/modals/UploadModal'; // Uncomment for local dev
 
 interface TrainingLayoutProps {
   children: ReactNode;
 }
 
 export default function TrainingLayout({ children }: TrainingLayoutProps) {
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  // const [isUploadModalOpen, setIsUploadModalOpen] = useState(false); // Uncomment for local dev
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar onUploadClick={() => setIsUploadModalOpen(true)} />
+      {/* For local dev with upload: <Sidebar onUploadClick={() => setIsUploadModalOpen(true)} /> */}
+      <Sidebar />
       
       {/* Main content */}
       <main className="lg:pl-64">
@@ -20,11 +22,12 @@ export default function TrainingLayout({ children }: TrainingLayoutProps) {
         </div>
       </main>
 
-      {/* Upload Modal */}
+      {/* Upload Modal - Uncomment for local dev
       <UploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
       />
+      */}
     </div>
   );
 }
