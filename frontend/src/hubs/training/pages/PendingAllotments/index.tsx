@@ -232,6 +232,15 @@ export default function PendingAllotments() {
     );
   }
 
+  // Full page loading while fetching initial data
+  if (loading && data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <LoadingSpinner size="lg" text="Loading pending allotments..." />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader

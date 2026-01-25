@@ -239,9 +239,13 @@ export default function Sidebar(_props: SidebarProps) {
       );
     }
 
+    // Use 'end' prop for Dashboard to prevent it from matching all /training/* routes
+    const isExactMatch = item.path === '/training';
+    
     return (
       <NavLink
         to={item.path}
+        end={isExactMatch}
         onClick={() => setIsMobileOpen(false)}
         className={({ isActive }) =>
           clsx(
@@ -252,13 +256,17 @@ export default function Sidebar(_props: SidebarProps) {
           )
         }
       >
-        <span className={clsx(
-          'p-1.5 rounded-lg transition-colors',
-          isActive(item.path) ? 'bg-primary-100' : 'bg-gray-100'
-        )}>
-          {item.icon}
-        </span>
-        <span>{item.name}</span>
+        {({ isActive }) => (
+          <>
+            <span className={clsx(
+              'p-1.5 rounded-lg transition-colors',
+              isActive ? 'bg-primary-100' : 'bg-gray-100'
+            )}>
+              {item.icon}
+            </span>
+            <span>{item.name}</span>
+          </>
+        )}
       </NavLink>
     );
   };

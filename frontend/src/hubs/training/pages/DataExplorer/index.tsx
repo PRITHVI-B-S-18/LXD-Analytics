@@ -312,6 +312,15 @@ export default function DataExplorer() {
     );
   }
 
+  // Full page loading while fetching initial data
+  if (loading && !transformedData && !rawData) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <LoadingSpinner size="lg" text="Loading data..." />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader

@@ -231,6 +231,15 @@ export default function ByDate() {
     );
   }
 
+  // Full page loading while fetching initial data
+  if (loading && !data) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <LoadingSpinner size="lg" text="Analyzing daily trends..." />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
