@@ -63,7 +63,10 @@ export default function ByDate() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!status?.is_loaded) {
+      // Wait for status to be fetched first
+      if (status === null) return;
+      
+      if (!status.is_loaded) {
         setLoading(false);
         return;
       }

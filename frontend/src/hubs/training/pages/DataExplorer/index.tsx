@@ -43,7 +43,10 @@ export default function DataExplorer() {
   // Fetch transformed data
   useEffect(() => {
     const fetchTransformedData = async () => {
-      if (!status?.is_loaded) {
+      // Wait for status to be fetched first
+      if (status === null) return;
+      
+      if (!status.is_loaded) {
         setLoading(false);
         return;
       }
@@ -65,7 +68,8 @@ export default function DataExplorer() {
   // Fetch raw data - load on mount and when pagination changes
   useEffect(() => {
     const fetchRawData = async () => {
-      if (!status?.is_loaded) {
+      // Wait for status to be fetched first
+      if (status === null || !status.is_loaded) {
         return;
       }
 
