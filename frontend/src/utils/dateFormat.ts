@@ -1,32 +1,38 @@
 /**
  * Format a date string or Date object to dd/mm/yyyy format for display
  */
-export function formatDisplayDate(date: string | Date | null | undefined): string {
-  if (!date) return '';
-  
+export function formatDisplayDate(date: string | Date | number | null | undefined): string {
+  if (date == null) return '';
+
   let dateObj: Date;
-  
+
   if (typeof date === 'string') {
     // Handle ISO format (2025-12-01 or 2025-12-01T00:00:00)
     const dateStr = date.split('T')[0];
     if (!dateStr || dateStr === 'NaN' || dateStr === 'Invalid Date') return '';
-    
+
     // Parse YYYY-MM-DD format
     const parts = dateStr.split('-');
-    if (parts.length !== 3) return date; // Return as-is if not in expected format
-    
+    if (parts.length !== 3) return date;
+
     const [year, month, day] = parts;
     return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
   }
-  
-  dateObj = date;
-  
-  if (isNaN(dateObj.getTime())) return '';
-  
+
+  if (typeof date === 'number') {
+    dateObj = new Date(date);
+  } else if (date instanceof Date) {
+    dateObj = date;
+  } else {
+    return '';
+  }
+
+  if (typeof dateObj.getTime !== 'function' || isNaN(dateObj.getTime())) return '';
+
   const day = String(dateObj.getDate()).padStart(2, '0');
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
   const year = dateObj.getFullYear();
-  
+
   return `${day}/${month}/${year}`;
 }
 
